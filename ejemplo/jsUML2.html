@@ -17,54 +17,104 @@
     window.onload = function () {
 
       var classDiagram = new UMLClassDiagram(
-        { id: 'classDiagram', width: 800, height: 500 }
+        { id: 'classDiagram', width: 1000, height: 800 }
       );
       classDiagram.setName('Modelo PIM')
 
       // CLASES
-      var persona = new UMLClass({ x: 100, y: 50 });
-      var cuenta_bancaria = new UMLClass({ x: 120, y: 250 });
-      var tipo_identificacion = new UMLClass({ x: 400, y: 70 });
-      var tipo_cuenta = new UMLClass({ x: 400, y: 255 });
+      var solicitud_credito = new UMLClass({ x: 100, y: 50 });
+      
+      solicitud_credito.setName("SolicitudCredito");
+      solicitud_credito.addAttribute('+monto:Double');
+      solicitud_credito.addAttribute('+plazo:Int');
+      solicitud_credito.addAttribute('+tasa:Double');
+      solicitud_credito.addAttribute('+fecha:String');
+      
+      solicitud_credito.addOperation('+setTablaAmortizacion(monto, plazo)');
 
+      classDiagram.addElement(solicitud_credito);
+     
+      var persona = new UMLClass({ x: 200, y: 250 });
+      
       persona.setName("Persona");
+      persona.addAttribute('+cedula:String');
       persona.addAttribute('+nombres:String');
-      persona.addAttribute('+apellidos:String');
-      persona.addAttribute('+numero_identificacion:String');
-      persona.addAttribute('+tipo_identificacion:String');
-      persona.addOperation('+getNombres():String');
-      persona.addOperation('+setNombres(nombres)');
-
-      cuenta_bancaria.setName("CuentaBancaria");
-      cuenta_bancaria.addAttribute('+numero:String');
-      cuenta_bancaria.addAttribute('+tipo_cuenta: TipoCuenta');
-      cuenta_bancaria.addOperation('+getNumero():String');
-      cuenta_bancaria.addOperation('+setNumero(nombres)');
-
-      tipo_identificacion.setName("<<enumeration>>\nTipoIdentificacion");
-      tipo_identificacion.addAttribute('CEDULA');
-      tipo_identificacion.addAttribute('PASAPORTE');
-
-      tipo_cuenta.setName("<<enumeration>>\nTipoCuenta");
-      tipo_cuenta.addAttribute('AHORRO');
-      tipo_cuenta.addAttribute('CORRIENTE');
-
+      persona.addAttribute('+apellidoPaterno:String');
+      persona.addAttribute('+apellidoMaterno:String');
+      persona.addAttribute('+fechaNacimiento:String');
+      
+      persona.addOperation('+setNombre(nombres, apellidoPaterno, apellidoMaterno)');
 
       classDiagram.addElement(persona);
-      classDiagram.addElement(cuenta_bancaria);
-      classDiagram.addElement(tipo_identificacion);
-      classDiagram.addElement(tipo_cuenta);
+     
+      
+      
+      var oficina = new UMLClass({ x: 600, y: 50 });
+      
+      oficina.setName("Oficina");
+      oficina.addAttribute('+codigo:Int');
+      oficina.addAttribute('+nombre:String');
+      oficina.addAttribute('+direccion:String');
+      oficina.addAttribute('+latitud:String');
+      oficina.addAttribute('+longitud:String');
+      
+      oficina.addOperation('+setNombre(nombre)');
 
+      classDiagram.addElement(oficina);
+     
+      var cliente = new UMLClass({ x: 700, y: 420 });
+      
+      cliente.setName("Cliente");
+      cliente.addAttribute('+cuenta:String');
+      cliente.addAttribute('+fechaRegistro:String');
+      cliente.addOperation('+setSolicitarCredito()');
+
+      classDiagram.addElement(cliente);
+
+     
+      var oficial = new UMLClass({ x: 0, y: 420 });
+      
+      oficial.setName("Oficial");
+      oficial.addAttribute('+login:String');
+      oficial.addAttribute('+fechaIngresa:String');
+      oficial.addOperation('+setGestionarCredito()');
+
+      classDiagram.addElement(oficial);
+     
       // RELACIONES
-      var composicion = new UMLComposition({ a: persona, b: cuenta_bancaria });
+      var composicion = new UMLComposition({ a: oficina, b: solicitud_credito });
       composicion.setValue( 'name', 'tiene');
+      composicion.setMultiplicityA( '1');
+      composicion.setMultiplicityB( '*');
       classDiagram.addElement(composicion);
+      
+      var composicion = new UMLGeneralization({ a: oficial, b: persona });
+      classDiagram.addElement(composicion);
+      
+      var composicion = new UMLGeneralization({ a: cliente, b: persona });
+      classDiagram.addElement(composicion);
+      
+      
+      var composicion = new UMLComposition({ a: cliente, b: solicitud_credito });
+      composicion.setValue( 'name', 'Solicita');
+      composicion.setMultiplicityA( '1');
+      composicion.setMultiplicityB( '*');
+      classDiagram.addElement(composicion);
+      
+      
+      var composicion = new UMLAggregation({ a: oficial, b: solicitud_credito });
+      composicion.setValue( 'name', 'Gestiona');
+      composicion.setMultiplicityA( '1');
+      composicion.setMultiplicityB( '*');
+      classDiagram.addElement(composicion);
+      
 
-      var dependencia1 = new UMLDependency({ a: persona, b: tipo_identificacion });
-      classDiagram.addElement(dependencia1);
-
-      var dependencia2 = new UMLDependency({ a: cuenta_bancaria, b: tipo_cuenta });
-      classDiagram.addElement(dependencia2);
+      
+      var composicion = new UMLAssociation({ a: oficina, b: persona });
+      composicion.setValue( 'name', 'pertenece a');
+      composicion.setMultiplicityA( '1');
+      composicion.setMultiplicityB( '*');
+      classDiagram.addElement(composicion);
 
       classDiagram.draw();
       classDiagram.interaction(true);
